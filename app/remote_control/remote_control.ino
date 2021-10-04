@@ -24,18 +24,48 @@
  *   * ESP-01 modules are tricky. We suggest you use a module with more GPIOs
  *     for your first time. e.g. ESP-12 etc.
  */
+#include "air_conditioner.h"
+
+#include "mode_switch.h"
+
+#include "button.h"
+
 #include <Arduino.h>
 
 void setup()
 {
     Serial.begin(115200);
     delay(200);
+
+    Serial.println("");
+    Serial.println("jon remote control ...");
+
+    button_init();
+
+    work_mode_init();
+    // 所有空调控制对象初始化
+    for (ac_remote_control_t *index = ac_control_arr; index->type != AC_NULL_TYPE; ++index)
+    {
+        ac_control_init(index);
+        if (index->type == AC_GREE_TYPE)
+        {
+          ac_control_use = index;
+        }
+    }
 }
 
 
 void loop()
 {
     // Now send the IR signal.
-    Serial.println("jon remote control ...");
-    delay(5000);
+    // ac_control_on(ac_control_use);
+
+    work_mode_switch();
+
+    button_task();
+
+    // gree_ac.send();
+
+    // Serial.printf("work_mode_switch_get = %d \r\n", sys_work_mode_get());
+    // delay(100);
 }
