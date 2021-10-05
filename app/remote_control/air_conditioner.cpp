@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 10:43:33
+* @LastEditTime : 2021-10-05 20:09:35
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
@@ -51,12 +51,16 @@ void ac_control_init(ac_remote_control_t *ac)
 void ac_control_on(ac_remote_control_t *ac)
 {
     ac->control->ac_on();
+    ac->ac_ir_work_status = AC_IR_WORK_RUN;
+    RUNNING_LOG(ac->ac_ir_work_status);
 }
 
 
 void ac_control_off(ac_remote_control_t *ac)
 {
     ac->control->ac_off();
+    ac->ac_ir_work_status = AC_IR_WORK_CLOSE;
+    RUNNING_LOG(ac->ac_ir_work_status);
 }
 
 
@@ -69,6 +73,12 @@ void ac_control_temp_up(ac_remote_control_t *ac)
 void ac_control_temp_down(ac_remote_control_t *ac)
 {
     ac->control->ac_temp_down();
+}
+
+
+void ac_control_mode_switch(ac_remote_control_t *ac)
+{
+    ac->control->ac_mode_switch();
 }
 
 
@@ -219,7 +229,7 @@ void midea_ac_temp_down(void)
 
 
 // todo: 空调模式切换
-void midea_ac_mode_switch(void)
+void gree_ac_mode_switch(void)
 {
     if (gree_ac_mode < kGreeHeat)
     {
@@ -238,7 +248,7 @@ void midea_ac_mode_switch(void)
 }
 
 
-void gree_ac_mode_switch(void)
+void midea_ac_mode_switch(void)
 {
     if (midea_ac_mode < kMideaACFan)
     {
@@ -281,7 +291,7 @@ ac_control_t midea_ac_control =
 // todo:列表切换空调遥控器
 ac_remote_control_t ac_control_arr[] =
 {
-    { AC_GREE_TYPE,  &gree_ac_control  },
-    { AC_MIDEA_TYPE, &midea_ac_control },
-    { AC_NULL_TYPE,  NULL              }
+    { AC_GREE_TYPE,  &gree_ac_control,  AC_IR_WORK_CLOSE },
+    { AC_MIDEA_TYPE, &midea_ac_control, AC_IR_WORK_CLOSE },
+    { AC_NULL_TYPE,  NULL,              AC_IR_WORK_CLOSE }
 };

@@ -42,14 +42,14 @@ void setup()
 
     button_init();
 
-    work_mode_init();
+    sys_ac_device_switch_init();
     // 所有空调控制对象初始化
     for (ac_remote_control_t *index = ac_control_arr; index->type != AC_NULL_TYPE; ++index)
     {
         ac_control_init(index);
         if (index->type == AC_GREE_TYPE)
         {
-          ac_control_use = index;
+            ac_control_use = index;
         }
     }
 }
@@ -60,12 +60,20 @@ void loop()
     // Now send the IR signal.
     // ac_control_on(ac_control_use);
 
-    work_mode_switch();
+    sys_ac_device_switch();
 
     button_task();
 
+
+    for (ac_remote_control_t *index = ac_control_arr; index->type != AC_NULL_TYPE; ++index)
+    {
+        if (index->type == sys_ac_device_get())
+        {
+            ac_control_use = index;
+        }
+    }
+
     // gree_ac.send();
 
-    // Serial.printf("work_mode_switch_get = %d \r\n", sys_work_mode_get());
     // delay(100);
 }

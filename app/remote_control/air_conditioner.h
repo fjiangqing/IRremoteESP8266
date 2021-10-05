@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:33:41
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 10:07:34
+* @LastEditTime : 2021-10-05 11:05:57
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.h
 * @Description  :
 *******************************************************************************/
@@ -41,10 +41,17 @@ typedef enum
     AC_NULL_TYPE,
 } ac_type_t;
 
+typedef enum
+{
+    AC_IR_WORK_CLOSE = 0,
+    AC_IR_WORK_RUN,
+} ac_ir_status_t;
+
 typedef struct
 {
-    ac_type_t    type;
-    ac_control_t *control;
+    ac_type_t      type;
+    ac_control_t   *control;
+    ac_ir_status_t ac_ir_work_status;
 } ac_remote_control_t;
 
 void ac_control_init(ac_remote_control_t *ac);
@@ -52,6 +59,8 @@ void ac_control_on(ac_remote_control_t *ac);
 void ac_control_off(ac_remote_control_t *ac);
 void ac_control_temp_up(ac_remote_control_t *ac);
 void ac_control_temp_down(ac_remote_control_t *ac);
+void ac_control_mode_switch(ac_remote_control_t *ac);
+
 
 extern ac_remote_control_t *ac_control_use;
 extern ac_remote_control_t ac_control_arr[];
