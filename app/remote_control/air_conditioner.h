@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:33:41
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-03 00:12:10
+* @LastEditTime : 2021-10-05 10:07:34
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.h
 * @Description  :
 *******************************************************************************/
@@ -21,6 +21,7 @@ typedef void (*ac_init_call_t)(void); //空调遥控初始化
 typedef void (*ac_on_call_t)(void);   //空调开控制
 typedef void (*ac_off_call_t)(void);  //空调关控制
 typedef void (*ac_temp_call_t)(void); //空调温度控制
+typedef void (*ac_mode_call_t)(void); //空调温度控制
 
 
 typedef struct
@@ -30,6 +31,7 @@ typedef struct
     ac_off_call_t  ac_off;
     ac_temp_call_t ac_temp_up;
     ac_temp_call_t ac_temp_down;
+    ac_mode_call_t ac_mode_switch;
 } ac_control_t;
 
 typedef enum

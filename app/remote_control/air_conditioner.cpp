@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-04 23:13:39
+* @LastEditTime : 2021-10-05 10:43:33
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
@@ -25,6 +25,12 @@
 // 模式
 // 温度
 // 开机
+#define RUNNING_LOG(VALUE_NAME)                                 \
+    do{                                                         \
+        Serial.printf("%s,%s\r\n", __FILE__, __func__);         \
+        Serial.printf("%s = %d\r\n", # VALUE_NAME, VALUE_NAME); \
+    }while (0)
+
 
 ac_remote_control_t *ac_control_use = NULL;
 // {
@@ -79,6 +85,11 @@ IRMideaAC midea_ac(kIrLed);
 static uint8_t gree_ac_temp  = 25;
 static uint8_t midea_ac_temp = 25;
 
+// todo:空调模式管理
+static uint8_t gree_ac_mode  = 0;
+static uint8_t midea_ac_mode = 0;
+
+
 // todo:检查初始化
 void gree_ac_init(void)
 {
@@ -89,8 +100,8 @@ void gree_ac_init(void)
     gree_ac.on();
     gree_ac.setFan(1);
     // kGreeAuto, kGreeDry, kGreeCool, kGreeFan, kGreeHeat
-    gree_ac.setMode(kGreeCool);
-    gree_ac.setTemp(25); // 16-30C
+    gree_ac.setMode(gree_ac_mode);
+    gree_ac.setTemp(gree_ac_temp); // 16-30C
     gree_ac.setSwingVertical(true, kGreeSwingAuto);
     gree_ac.setXFan(false);
     gree_ac.setLight(true);
@@ -106,9 +117,11 @@ void midea_ac_init(void)
     midea_ac.on();
     midea_ac.setFan(1);
     // kGreeAuto, kGreeDry, kGreeCool, kGreeFan, kGreeHeat
-    midea_ac.setMode(kMideaACCool);
+    midea_ac.setMode(midea_ac_mode);
     midea_ac.setTemp(midea_ac_temp); // 16-30C
     midea_ac.setSleep(false);
+    midea_ac.setLightToggle(true);
+
     Serial.println("midea_ac init");
 }
 
@@ -126,6 +139,7 @@ void midea_ac_on(void)
 {
     midea_ac.on();
     midea_ac.send();
+    RUNNING_LOG(NULL);
 }
 
 
@@ -134,6 +148,7 @@ void gree_ac_off(void)
 {
     gree_ac.off();
     gree_ac.send();
+    RUNNING_LOG(NULL);
 }
 
 
@@ -141,6 +156,7 @@ void midea_ac_off(void)
 {
     midea_ac.off();
     midea_ac.send();
+    RUNNING_LOG(NULL);
 }
 
 
@@ -154,6 +170,8 @@ void gree_ac_temp_up(void)
     gree_ac.send();
 
     gree_ac_temp = gree_ac.getTemp();
+
+    RUNNING_LOG(gree_ac_temp);
 }
 
 
@@ -166,6 +184,8 @@ void midea_ac_temp_up(void)
     midea_ac.send();
 
     midea_ac_temp = midea_ac.getTemp();
+
+    RUNNING_LOG(midea_ac_temp);
 }
 
 
@@ -179,6 +199,8 @@ void gree_ac_temp_down(void)
     gree_ac.send();
 
     gree_ac_temp = gree_ac.getTemp();
+
+    RUNNING_LOG(gree_ac_temp);
 }
 
 
@@ -191,26 +213,69 @@ void midea_ac_temp_down(void)
     midea_ac.send();
 
     midea_ac_temp = midea_ac.getTemp();
+
+    RUNNING_LOG(midea_ac_temp);
+}
+
+
+// todo: 空调模式切换
+void midea_ac_mode_switch(void)
+{
+    if (gree_ac_mode < kGreeHeat)
+    {
+        ++gree_ac_mode;
+    }
+    else
+    {
+        gree_ac_mode = kGreeAuto;
+    }
+
+    gree_ac.setMode(gree_ac_mode);
+
+    gree_ac.send();
+
+    RUNNING_LOG(gree_ac_mode);
+}
+
+
+void gree_ac_mode_switch(void)
+{
+    if (midea_ac_mode < kMideaACFan)
+    {
+        ++midea_ac_mode;
+    }
+    else
+    {
+        midea_ac_mode = kMideaACCool;
+    }
+
+    midea_ac.setMode(midea_ac_mode);
+
+    midea_ac.send();
+
+    RUNNING_LOG(midea_ac_mode);
 }
 
 
 // todo: 添加构造函数初始化
 ac_control_t gree_ac_control =
 {
-    .ac_init      = gree_ac_init,
-    .ac_on        = gree_ac_on,
-    .ac_off       = gree_ac_off,
-    .ac_temp_up   = gree_ac_temp_up,
-    .ac_temp_down = gree_ac_temp_down,
+    .ac_init        = gree_ac_init,
+    .ac_on          = gree_ac_on,
+    .ac_off         = gree_ac_off,
+    .ac_temp_up     = gree_ac_temp_up,
+    .ac_temp_down   = gree_ac_temp_down,
+    .ac_mode_switch = gree_ac_mode_switch,
 };
 
 ac_control_t midea_ac_control =
 {
-    .ac_init      = midea_ac_init,
-    .ac_on        = midea_ac_on,
-    .ac_off       = midea_ac_off,
-    .ac_temp_up   = midea_ac_temp_up,
-    .ac_temp_down = midea_ac_temp_down,
+    .ac_init        = midea_ac_init,
+    .ac_on          = midea_ac_on,
+    .ac_off         = midea_ac_off,
+    .ac_temp_up     = midea_ac_temp_up,
+    .ac_temp_down   = midea_ac_temp_down,
+    .ac_mode_switch = midea_ac_mode_switch,
 };
 
 // todo:列表切换空调遥控器
