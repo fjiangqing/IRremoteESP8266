@@ -30,6 +30,8 @@
 
 #include "button.h"
 
+#include "ir_learn.h"
+
 #include <Arduino.h>
 
 void setup()
@@ -39,6 +41,8 @@ void setup()
 
     Serial.println("");
     Serial.println("jon remote control ...");
+
+    ir_learn_init();
 
     button_init();
 
@@ -64,6 +68,7 @@ void loop()
 
     button_task();
 
+    ir_learn_task();
 
     for (ac_remote_control_t *index = ac_control_arr; index->type != AC_NULL_TYPE; ++index)
     {

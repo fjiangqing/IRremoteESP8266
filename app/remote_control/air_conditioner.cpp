@@ -2,12 +2,14 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 20:09:35
+* @LastEditTime : 2021-10-06 14:59:32
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
 
 #include "air_conditioner.h"
+
+#include "ir_learn.h"
 
 #include <Arduino.h>
 
@@ -90,6 +92,7 @@ IRGreeAC gree_ac(kIrLed);   // Set the GPIO to be used for sending messages.
 
 IRMideaAC midea_ac(kIrLed);
 
+IRsend universal_ir_send(kIrLed);
 
 // todo:添加温度管理
 static uint8_t gree_ac_temp  = 25;
@@ -136,6 +139,13 @@ void midea_ac_init(void)
 }
 
 
+void universal_ir_init(void)
+{
+    universal_ir_send.begin();
+    Serial.printf("%s init\r\n", __func__);
+}
+
+
 // todo:添加on
 void gree_ac_on(void)
 {
@@ -153,6 +163,23 @@ void midea_ac_on(void)
 }
 
 
+void ir_learn_send(ir_code_t& code)
+{
+    universal_ir_send.send(code.decode_type, \
+                           code.value, sizeof(code.value) * 8);
+}
+
+
+void universal_ir_on(void)
+{
+    // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
+
+    ir_learn_send(ir_button_code_record.power_button_code);
+
+    RUNNING_LOG(NULL);
+}
+
+
 // todo:添加off
 void gree_ac_off(void)
 {
@@ -166,6 +193,16 @@ void midea_ac_off(void)
 {
     midea_ac.off();
     midea_ac.send();
+    RUNNING_LOG(NULL);
+}
+
+
+void universal_ir_off(void)
+{
+    // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
+
+    ir_learn_send(ir_button_code_record.power_button_code);
+
     RUNNING_LOG(NULL);
 }
 
@@ -199,6 +236,16 @@ void midea_ac_temp_up(void)
 }
 
 
+void universal_ir_temp_up(void)
+{
+    // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
+
+    ir_learn_send(ir_button_code_record.temp_up_button_code);
+
+    RUNNING_LOG(NULL);
+}
+
+
 // todo:添加温度减少
 void gree_ac_temp_down(void)
 {
@@ -225,6 +272,16 @@ void midea_ac_temp_down(void)
     midea_ac_temp = midea_ac.getTemp();
 
     RUNNING_LOG(midea_ac_temp);
+}
+
+
+void universal_ir_temp_down(void)
+{
+    // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
+
+    ir_learn_send(ir_button_code_record.temp_down_button_code);
+
+    RUNNING_LOG(NULL);
 }
 
 
@@ -267,6 +324,16 @@ void midea_ac_mode_switch(void)
 }
 
 
+void universal_ir_mode_switch(void)
+{
+    // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
+
+    ir_learn_send(ir_button_code_record.mode_switch_button_code);
+
+    RUNNING_LOG(NULL);
+}
+
+
 // todo: 添加构造函数初始化
 ac_control_t gree_ac_control =
 {
@@ -288,10 +355,21 @@ ac_control_t midea_ac_control =
     .ac_mode_switch = midea_ac_mode_switch,
 };
 
+ac_control_t universal_ir_control =
+{
+    .ac_init        = universal_ir_init,
+    .ac_on          = universal_ir_on,
+    .ac_off         = universal_ir_off,
+    .ac_temp_up     = universal_ir_temp_up,
+    .ac_temp_down   = universal_ir_temp_down,
+    .ac_mode_switch = universal_ir_mode_switch,
+};
+
 // todo:列表切换空调遥控器
 ac_remote_control_t ac_control_arr[] =
 {
-    { AC_GREE_TYPE,  &gree_ac_control,  AC_IR_WORK_CLOSE },
-    { AC_MIDEA_TYPE, &midea_ac_control, AC_IR_WORK_CLOSE },
-    { AC_NULL_TYPE,  NULL,              AC_IR_WORK_CLOSE }
+    { AC_GREE_TYPE,          &gree_ac_control,      AC_IR_WORK_CLOSE },
+    { AC_MIDEA_TYPE,         &midea_ac_control,     AC_IR_WORK_CLOSE },
+    { LEARN_IR_CONTROL_TYPE, &universal_ir_control, AC_IR_WORK_CLOSE },
+    { AC_NULL_TYPE,          NULL,                  AC_IR_WORK_CLOSE }
 };

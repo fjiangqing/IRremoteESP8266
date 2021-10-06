@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 23:46:31
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 11:20:50
+* @LastEditTime : 2021-10-06 14:59:40
 * @FilePath     : \IRremoteESP8266\app\remote_control\mode_switch.h
 * @Description  :
 *******************************************************************************/
@@ -15,7 +15,7 @@ typedef enum
 {
     AC_GREE_MODE  = AC_GREE_TYPE,
     AC_MIDEA_MODE = AC_MIDEA_TYPE,
-    AC_LEARN_MODE,
+    AC_LEARN_MODE = LEARN_IR_CONTROL_TYPE,
     AC_NULL_MODE,
 } work_mode_t;
 

@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:33:41
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 11:05:57
+* @LastEditTime : 2021-10-06 14:59:31
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.h
 * @Description  :
 *******************************************************************************/
@@ -38,6 +38,7 @@ typedef enum
 {
     AC_GREE_TYPE = 0,
     AC_MIDEA_TYPE,
+    LEARN_IR_CONTROL_TYPE,
     AC_NULL_TYPE,
 } ac_type_t;
 
