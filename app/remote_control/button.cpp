@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:57:44
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 11:09:15
+* @LastEditTime : 2021-10-06 11:47:12
 * @FilePath     : \IRremoteESP8266\app\remote_control\button.cpp
 * @Description  :
 *******************************************************************************/
@@ -11,8 +11,6 @@
 #include "air_conditioner.h"
 
 #include <Arduino.h>
-
-#include <stdint.h>
 
 #include <string.h>
 
@@ -40,10 +38,10 @@
 char button_down_name[32];
 
 
-const uint16_t power_pin       = 16;
-const uint16_t temp_up_pin     = 0;
-const uint16_t temp_down_pin   = 4;
-const uint16_t mode_switch_pin = 12;
+// const uint16_t power_pin       = 16;
+// const uint16_t temp_up_pin     = 0;
+// const uint16_t temp_down_pin   = 14;
+// const uint16_t mode_switch_pin = 12;
 // const uint16_t fan_pin         = 10;
 
 const uint16_t button_delay = 150;
