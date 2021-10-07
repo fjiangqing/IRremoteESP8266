@@ -545,10 +545,15 @@ bool Adafruit_SSD1306::begin(uint8_t vcs, uint8_t addr, bool reset,
 
   ssd1306_command1((vccstate == SSD1306_EXTERNALVCC) ? 0x10 : 0x14);
 
+  // static const uint8_t PROGMEM init3[] = {SSD1306_MEMORYMODE, // 0x20
+  //                                         0x00, // 0x0 act like ks0108
+  //                                         SSD1306_SEGREMAP | 0x1,
+  //                                         SSD1306_COMSCANDEC};  
+  // todo :上下左右翻转
   static const uint8_t PROGMEM init3[] = {SSD1306_MEMORYMODE, // 0x20
                                           0x00, // 0x0 act like ks0108
-                                          SSD1306_SEGREMAP | 0x1,
-                                          SSD1306_COMSCANDEC};
+                                          SSD1306_SEGREMAP,
+                                          SSD1306_COMSCANINC};
   ssd1306_commandList(init3, sizeof(init3));
 
   uint8_t comPins = 0x02;
