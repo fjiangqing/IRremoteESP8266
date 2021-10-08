@@ -32,21 +32,7 @@
 
 #include "ir_learn.h"
 
-#include <Arduino.h>
-
-#include <Wire.h>
-
-#include <Wire.h>
-
-#include <Adafruit_GFX.h>
-
-#include <Adafruit_SSD1306.h>
-
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
-
-uint8_t make[] = { 0x04, 0x04, 0x24, 0x04, 0x24, 0x04, 0x3F, 0xA4, 0x44, 0x24, 0x04, 0x24, 0xFF, 0xE4, 0x04, 0x24, 0x04, 0x24, 0x3F, 0xA4, 0x24, 0xA4, 0x24, 0xA4, 0x26, 0x84, 0x25, 0x04, 0x04, 0x14, 0x04, 0x08 }; /*"制",0*/
-uint8_t cool[] = { 0x00, 0x40, 0x40, 0x40, 0x20, 0xA0, 0x20, 0xA0, 0x01, 0x10, 0x02, 0x48, 0x14, 0x26, 0x10, 0x20, 0x23, 0xF8, 0xE0, 0x08, 0x20, 0x10, 0x21, 0x10, 0x20, 0xA0, 0x20, 0x40, 0x20, 0x20, 0x00, 0x20 }; /*"冷",0*/
-
+#include "ir_display.h"
 
 void setup()
 {
@@ -71,36 +57,7 @@ void setup()
         }
     }
 
-
-    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-
-    // Show image buffer on the display hardware.
-    // Since the buffer is intialized with an Adafruit splashscreen
-    // internally, this will display the splashscreen.
-    display.display();
-    delay(1000);
-
-    // Clear the buffer.
-    display.clearDisplay();
-    display.display();
-
-    // text display tests
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-//   display.setCursor(0,0);
-//   display.print("Connecting to SSID\n'adafruit':");
-//   display.print("connected!");
-//   display.setTextSize(2);
-//   display.println("IP: 10.0.1.23");
-//   display.println("Sending val #0");
-    display.setCursor(0, 0);
-    
-    display.drawBitmap(0, 0, make, 2 * 8, 2 * 8, SSD1306_WHITE);
-
-    display.drawBitmap(2 * 8, 0, cool, 2 * 8, 2 * 8, SSD1306_WHITE);
-    // display.fillCircle(20, 20, 10, SSD1306_WHITE);
-    display.display(); // actually display all of the above
+    display_init();
 }
 
 
