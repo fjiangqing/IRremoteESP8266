@@ -80,6 +80,7 @@ void loop()
         }
     }
 
+    display_task();
     // gree_ac.send();
 
     // delay(100);

@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:20:20
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 13:45:13
+* @LastEditTime : 2021-10-08 15:53:51
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.cpp
 * @Description  :
 *******************************************************************************/
@@ -25,6 +25,7 @@ typedef uint16_t   display_pixels_t;
 typedef struct
 {
     uint8_t          *data;
+    uint8_t          word_number;
     display_point_t  begin_x;
     display_point_t  begin_y;
     display_pixels_t width;
@@ -83,9 +84,25 @@ uint8_t temp_code_word[] = {
     0x60, 0x00, 0x91, 0xF4, 0x96, 0x0C, 0x6C, 0x04, 0x08, 0x04, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x08, 0x00, 0x0C, 0x04, 0x06, 0x08, 0x01, 0xF0, 0x00, 0x00, /*"℃",0*/
 };
 
+// 运行
+uint8_t ir_run_word[] = {
+    0x00, 0x00, 0x23, 0xF8, 0x10, 0x00, 0x10, 0x00, 0x00, 0x00, 0x07, 0xFC, 0xF0, 0x40, 0x10, 0x80, 0x11, 0x10, 0x12, 0x08, 0x17, 0xFC, 0x12, 0x04, 0x10, 0x00, 0x28, 0x00, 0x47, 0xFE, 0x00, 0x00, /*"运",0*/
+    0x08, 0x00, 0x09, 0xFC, 0x10, 0x00, 0x20, 0x00, 0x48, 0x00, 0x08, 0x00, 0x13, 0xFE, 0x30, 0x20, 0x50, 0x20, 0x90, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0x20, 0x10, 0xA0, 0x10, 0x40, /*"行",1*/
+};
 
+// 运行
+uint8_t ir_close_word[] = {
+    0x10, 0x10, 0x08, 0x10, 0x08, 0x20, 0x00, 0x00, 0x3F, 0xF8, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0xFF, 0xFE, 0x01, 0x00, 0x02, 0x80, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x30, 0x18, 0xC0, 0x06, /*"关",0*/
+    0x10, 0x00, 0x11, 0xF0, 0x11, 0x10, 0x11, 0x10, 0xFD, 0x10, 0x11, 0x10, 0x31, 0x10, 0x39, 0x10, 0x55, 0x10, 0x55, 0x10, 0x91, 0x10, 0x11, 0x12, 0x11, 0x12, 0x12, 0x12, 0x12, 0x0E, 0x14, 0x00, /*"机",1*/
+};
+
+#define CHINESE_16BIT_1WORD_PIXELS_WIDTH    16
+#define CHINESE_16BIT_2WORD_PIXELS_WIDTH    (CHINESE_16BIT_1WORD_PIXELS_WIDTH * 2)
+#define CHINESE_16BIT_1WORD_PIXELS_HIGH     16
 
 void display_chinese_16bit(uint8_t *word, uint8_t word_number, display_point_t x, display_point_t y);
+void display_work_mode_switch(void);
+void ir_display_chinese_data(ir_display_data_t& display_data);
 
 void display_init(void)
 {
@@ -118,12 +135,35 @@ void display_init(void)
     // display.fillCircle(20, 20, 10, SSD1306_WHITE);
 
     // display.drawBitmap(0, 0, device_gree_name, 2 * 16, 1 * 16, SSD1306_WHITE);
-    display_chinese_16bit(temp_code_word, 1, IR_DEVICE_BEGIN_POINT_X, IR_DEVICE_BEGIN_POINT_Y);
+    // display_chinese_16bit(temp_code_word, 1, IR_DEVICE_BEGIN_POINT_X, IR_DEVICE_BEGIN_POINT_Y);
     display.display(); // actually display all of the above
 
 
+    // display_chinese_16bit(device_gree_name, 2, 0, 0);
+    // display_chinese_16bit(mode_cool_word, 2, 0, 40);
 
-    // display_work_mode_switch();
+    display_work_mode_switch();
+    ir_display_chinese_data(display_devices);
+
+    ir_display_chinese_data(display_mode_status);
+
+    display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
+    display.display();
+
+    display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
+    display.display();
+
+    ir_display_chinese_data(display_work_status);
+
+    
+    display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
+    display.setTextSize(3);
+    display.println("25");
+    display.display();
+
+    display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);
+    
+    display.display();
 }
 
 
@@ -137,29 +177,68 @@ void display_chinese_16bit(uint8_t *word, uint8_t word_number, display_point_t x
 
         begin_x += word_pixels;
         // todo：添加换行
-
+        Serial.printf("__func__ = %s\r\n", __func__);
         // begin_y += word_pixels;
     }
+    display.display();
 }
 
 
-void display_devices_name_set(uint8_t *device_name, display_point_t x, display_point_t y, display_pixels_t w, display_pixels_t h)
+void ir_display_chinese_data(ir_display_data_t& display_data)
 {
-    display_devices.data    = device_name;
-    display_devices.begin_x = x;
-    display_devices.begin_y = y;
-    display_devices.width   = w;
-    display_devices.high    = h;
+    // display.setCursor(display_data.begin_x, display_data.begin_y);
+    display_chinese_16bit(display_data.data, display_data.word_number, display_data.begin_x, display_data.begin_y);
+}
+
+
+void display_devices_name_set(uint8_t *device_name, uint8_t word_number = 2)
+{
+    display_devices.data        = device_name;
+    display_devices.word_number = word_number;
+
+    display_devices.begin_x = IR_DEVICE_BEGIN_POINT_X;
+    display_devices.begin_y = IR_DEVICE_BEGIN_POINT_Y;
+
+    display_devices.width = 0;
+    display_devices.high  = 0;
+}
+
+
+void display_mode_name_set(uint8_t *mode_name, uint8_t word_number = 2)
+{
+    display_mode_status.data        = mode_name;
+    display_mode_status.word_number = word_number;
+
+    display_mode_status.begin_x = IR_AC_MODE_BEGIN_POINT_X;
+    display_mode_status.begin_y = IR_AC_MODE_BEGIN_POINT_Y;
+
+    display_mode_status.width = 0;
+    display_mode_status.high  = 0;
+}
+
+
+void display_work_status_name_set(uint8_t *mode_name, uint8_t word_number = 2)
+{
+    display_work_status.data        = mode_name;
+    display_work_status.word_number = word_number;
+
+    display_work_status.begin_x = IR_WORK_BEGIN_POINT_X;
+    display_work_status.begin_y = IR_WORK_BEGIN_POINT_Y;
+
+    display_work_status.width = 0;
+    display_work_status.high  = 0;
 }
 
 
 void display_work_mode_switch(void)
 {
+    Serial.printf("ac_control_use->type = %d\r\n", ac_control_use->type);
     switch (ac_control_use->type)
     {
     case AC_GREE_TYPE:
-        display_devices_name_set(device_gree_name, IR_DEVICE_BEGIN_POINT_X, IR_AC_MODE_BEGIN_POINT_Y,
-                                 2 * 16, 1 * 16);
+
+        display_devices_name_set(device_gree_name);
+        display_mode_name_set(mode_cool_word);
         break;
 
     case AC_MIDEA_TYPE:
@@ -173,9 +252,40 @@ void display_work_mode_switch(void)
     default:
         break;
     }
+
+    if (ac_control_use->ac_ir_work_status == AC_IR_WORK_RUN)
+    {
+        display_work_status_name_set(ir_run_word);
+    }
+    else
+    {
+        display_work_status_name_set(ir_close_word);
+    }
 }
 
 
 void display_task(void)
 {
+    return;
+
+    #if 0
+    static uint32_t timer_old = 0;
+
+    if (millis() - timer_old > 500)
+    {
+        Serial.printf("__func__ = %s\r\n", __func__);
+
+        timer_old = millis();
+
+        // display.clearDisplay();
+        // display.display();
+
+
+        display_work_mode_switch();
+
+        ir_display_chinese_data(display_devices);
+
+        // ir_display_chinese_data(display_mode_status);
+    }
+    #endif
 }
