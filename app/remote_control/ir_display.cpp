@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:20:20
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 16:29:55
+* @LastEditTime : 2021-10-08 21:06:18
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.cpp
 * @Description  :
 *******************************************************************************/
@@ -177,10 +177,10 @@ void display_chinese_16bit(uint8_t *word, uint8_t word_number, display_point_t x
 
         begin_x += word_pixels;
         // todo：添加换行
-        Serial.printf("__func__ = %s\r\n", __func__);
+        // Serial.printf("__func__ = %s\r\n", __func__);
         // begin_y += word_pixels;
     }
-    display.display();
+    // display.display();
 }
 
 
@@ -230,9 +230,10 @@ void display_work_status_name_set(uint8_t *mode_name, uint8_t word_number = 2)
 }
 
 
+// todo:next
 void display_work_mode_switch(void)
 {
-    Serial.printf("ac_control_use->type = %d\r\n", ac_control_use->type);
+    // Serial.printf("ac_control_use->type = %d\r\n", ac_control_use->type);
     switch (ac_control_use->type)
     {
     case AC_GREE_TYPE:
@@ -271,12 +272,16 @@ void display_task(void)
 
     if (millis() - timer_old > 500)
     {
-        Serial.printf("__func__ = %s\r\n", __func__);
-
         timer_old = millis();
 
         display_work_mode_switch();
 
+        display.clearDisplay();
+
+        display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
+
+        display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
+        
         ir_display_chinese_data(display_devices);
 
         ir_display_chinese_data(display_mode_status);

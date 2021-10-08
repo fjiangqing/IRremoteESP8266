@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 16:24:26
+* @LastEditTime : 2021-10-08 20:55:51
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
@@ -112,8 +112,8 @@ static uint8_t gree_ac_temp  = 25;
 static uint8_t midea_ac_temp = 25;
 
 // todo:空调模式管理
-static uint8_t gree_ac_mode  = 0;
-static uint8_t midea_ac_mode = 0;
+static uint8_t gree_ac_mode  = kGreeCool;
+static uint8_t midea_ac_mode = kMideaACCool;
 
 
 // todo:检查初始化
