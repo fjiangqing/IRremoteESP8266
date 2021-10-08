@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:20:20
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 15:53:51
+* @LastEditTime : 2021-10-08 16:29:55
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.cpp
 * @Description  :
 *******************************************************************************/
@@ -155,14 +155,14 @@ void display_init(void)
 
     ir_display_chinese_data(display_work_status);
 
-    
+
     display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
     display.setTextSize(3);
     display.println("25");
     display.display();
 
     display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);
-    
+
     display.display();
 }
 
@@ -266,9 +266,7 @@ void display_work_mode_switch(void)
 
 void display_task(void)
 {
-    return;
-
-    #if 0
+    #if 1
     static uint32_t timer_old = 0;
 
     if (millis() - timer_old > 500)
@@ -277,15 +275,19 @@ void display_task(void)
 
         timer_old = millis();
 
-        // display.clearDisplay();
-        // display.display();
-
-
         display_work_mode_switch();
 
         ir_display_chinese_data(display_devices);
 
-        // ir_display_chinese_data(display_mode_status);
+        ir_display_chinese_data(display_mode_status);
+
+        ir_display_chinese_data(display_work_status);
+
+        display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
+
+        display.printf("%d", ac_control_temp_get(ac_control_use));
+
+        display.display();
     }
     #endif
 }

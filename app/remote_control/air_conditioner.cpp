@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-06 14:59:32
+* @LastEditTime : 2021-10-08 16:24:26
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
@@ -75,6 +75,19 @@ void ac_control_temp_up(ac_remote_control_t *ac)
 void ac_control_temp_down(ac_remote_control_t *ac)
 {
     ac->control->ac_temp_down();
+}
+
+
+int ac_control_temp_get(ac_remote_control_t *ac)
+{
+    if (ac->control->ac_temp_get != NULL)
+    {
+        return ac->control->ac_temp_get();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
@@ -275,6 +288,28 @@ void midea_ac_temp_down(void)
 }
 
 
+// 温度获取
+
+int gree_temp_get()
+{
+    int temp = gree_ac.getTemp();
+
+    RUNNING_LOG(temp);
+
+    return temp;
+}
+
+
+int midea_temp_get()
+{
+    int temp = midea_ac.getTemp();
+
+    RUNNING_LOG(temp);
+
+    return temp;
+}
+
+
 void universal_ir_temp_down(void)
 {
     // ir_code_t button_ir_code = ir_button_code_record.power_button_code;
@@ -343,6 +378,7 @@ ac_control_t gree_ac_control =
     .ac_temp_up     = gree_ac_temp_up,
     .ac_temp_down   = gree_ac_temp_down,
     .ac_mode_switch = gree_ac_mode_switch,
+    .ac_temp_get    = gree_temp_get,
 };
 
 ac_control_t midea_ac_control =
@@ -353,6 +389,7 @@ ac_control_t midea_ac_control =
     .ac_temp_up     = midea_ac_temp_up,
     .ac_temp_down   = midea_ac_temp_down,
     .ac_mode_switch = midea_ac_mode_switch,
+    .ac_temp_get    = midea_temp_get,
 };
 
 ac_control_t universal_ir_control =

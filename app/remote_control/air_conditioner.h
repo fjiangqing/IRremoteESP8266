@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:33:41
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-06 14:59:31
+* @LastEditTime : 2021-10-08 16:27:46
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.h
 * @Description  :
 *******************************************************************************/
@@ -17,22 +17,25 @@
 // 修改某个参数
 // 发送红外数据
 
-typedef void (*ac_init_call_t)(void); //空调遥控初始化
-typedef void (*ac_on_call_t)(void);   //空调开控制
-typedef void (*ac_off_call_t)(void);  //空调关控制
-typedef void (*ac_temp_call_t)(void); //空调温度控制
-typedef void (*ac_mode_call_t)(void); //空调温度控制
+typedef void (*ac_init_call_t)(void);    //空调遥控初始化
+typedef void (*ac_on_call_t)(void);      //空调开控制
+typedef void (*ac_off_call_t)(void);     //空调关控制
+typedef void (*ac_temp_call_t)(void);    //空调温度控制
+typedef int (*ac_temp_get_call_t)(void); //空调温度获取
+typedef void (*ac_mode_call_t)(void);    //空调温度控制
 
 
 typedef struct
 {
-    ac_init_call_t ac_init;
-    ac_on_call_t   ac_on;
-    ac_off_call_t  ac_off;
-    ac_temp_call_t ac_temp_up;
-    ac_temp_call_t ac_temp_down;
-    ac_mode_call_t ac_mode_switch;
+    ac_init_call_t     ac_init;
+    ac_on_call_t       ac_on;
+    ac_off_call_t      ac_off;
+    ac_temp_call_t     ac_temp_up;
+    ac_temp_call_t     ac_temp_down;
+    ac_mode_call_t     ac_mode_switch;
+    ac_temp_get_call_t ac_temp_get;
 } ac_control_t;
+
 
 typedef enum
 {
@@ -60,6 +63,9 @@ void ac_control_on(ac_remote_control_t *ac);
 void ac_control_off(ac_remote_control_t *ac);
 void ac_control_temp_up(ac_remote_control_t *ac);
 void ac_control_temp_down(ac_remote_control_t *ac);
+int ac_control_temp_get(ac_remote_control_t *ac);
+
+// int ac_control_temp_get(ac_remote_control_t *ac);
 void ac_control_mode_switch(ac_remote_control_t *ac);
 
 
