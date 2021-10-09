@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:20:20
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 21:06:18
+* @LastEditTime : 2021-10-09 15:23:44
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.cpp
 * @Description  :
 *******************************************************************************/
@@ -19,9 +19,48 @@
 
 #include <Adafruit_SSD1306.h>
 
+#include "ir_Gree.h"
+
+#include "ir_Midea.h"
+
 typedef uint16_t   display_point_t;
 typedef uint16_t   display_pixels_t;
 
+typedef enum
+{
+    AC_AUTO_MODE = 0,
+    AC_DRY_MODE,
+    AC_COOL_MODE,
+    AC_FAN_MODE,
+    AC_HEAT_MODE,
+    AC_NULL_MODE,
+} ac_work_mode_t;
+
+typedef struct
+{
+    uint8_t        outside_ac_mode;
+    ac_work_mode_t type_ac_mode;
+} outside_ac_mode_2_type_ac_mode_t;
+
+outside_ac_mode_2_type_ac_mode_t gree_2_type_ac[] =
+{
+    { kGreeAuto, AC_AUTO_MODE },
+    { kGreeDry,  AC_DRY_MODE  },
+    { kGreeCool, AC_COOL_MODE },
+    { kGreeFan,  AC_FAN_MODE  },
+    { kGreeHeat, AC_HEAT_MODE },
+    { NULL,      AC_NULL_MODE },
+};
+
+outside_ac_mode_2_type_ac_mode_t midea_2_type_ac[] =
+{
+    { kMideaACAuto, AC_AUTO_MODE },
+    { kMideaACDry,  AC_DRY_MODE  },
+    { kMideaACCool, AC_COOL_MODE },
+    { kMideaACFan,  AC_FAN_MODE  },
+    { kMideaACHeat, AC_HEAT_MODE },
+    { NULL,         AC_NULL_MODE },
+};
 typedef struct
 {
     uint8_t          *data;
@@ -79,6 +118,11 @@ uint8_t mode_fan_word[] = {
     0x00, 0x00, 0x3F, 0xF0, 0x20, 0x10, 0x20, 0x10, 0x28, 0x50, 0x24, 0x50, 0x22, 0x90, 0x22, 0x90, 0x21, 0x10, 0x21, 0x10, 0x22, 0x90, 0x22, 0x92, 0x24, 0x4A, 0x48, 0x4A, 0x40, 0x06, 0x80, 0x02, /*"风",1*/
 };
 
+uint8_t mode_dry_word[] = {
+    0x00, 0x40, 0x78, 0x40, 0x48, 0xA0, 0x51, 0x10, 0x52, 0x08, 0x65, 0xF6, 0x50, 0x40, 0x48, 0x40, 0x4F, 0xFC, 0x48, 0x40, 0x6A, 0x50, 0x52, 0x48, 0x44, 0x44, 0x48, 0x44, 0x41, 0x40, 0x40, 0x80, /*"除",0*/
+    0x00, 0x00, 0x27, 0xF8, 0x14, 0x08, 0x14, 0x08, 0x87, 0xF8, 0x44, 0x08, 0x44, 0x08, 0x17, 0xF8, 0x11, 0x20, 0x21, 0x20, 0xE9, 0x24, 0x25, 0x28, 0x23, 0x30, 0x21, 0x20, 0x2F, 0xFE, 0x00, 0x00, /*"湿",1*/
+};
+
 // 温度符合
 uint8_t temp_code_word[] = {
     0x60, 0x00, 0x91, 0xF4, 0x96, 0x0C, 0x6C, 0x04, 0x08, 0x04, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x18, 0x00, 0x08, 0x00, 0x0C, 0x04, 0x06, 0x08, 0x01, 0xF0, 0x00, 0x00, /*"℃",0*/
@@ -121,49 +165,38 @@ void display_init(void)
     // text display tests
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
-//   display.setCursor(0,0);
-//   display.print("Connecting to SSID\n'adafruit':");
-//   display.print("connected!");
-//   display.setTextSize(2);
-//   display.println("IP: 10.0.1.23");
-    // display.println("℃");
+
     display.setCursor(0, 0);
 
-    // display.drawBitmap(0, 0, make, 2 * 8, 2 * 8, SSD1306_WHITE);
-
-    // display.drawBitmap(2 * 8, 0, cool, 2 * 8, 2 * 8, SSD1306_WHITE);
-    // display.fillCircle(20, 20, 10, SSD1306_WHITE);
-
-    // display.drawBitmap(0, 0, device_gree_name, 2 * 16, 1 * 16, SSD1306_WHITE);
-    // display_chinese_16bit(temp_code_word, 1, IR_DEVICE_BEGIN_POINT_X, IR_DEVICE_BEGIN_POINT_Y);
     display.display(); // actually display all of the above
 
-
+    #if 0
     // display_chinese_16bit(device_gree_name, 2, 0, 0);
     // display_chinese_16bit(mode_cool_word, 2, 0, 40);
 
-    display_work_mode_switch();
-    ir_display_chinese_data(display_devices);
+    // display_work_mode_switch();
+    // ir_display_chinese_data(display_devices);
 
-    ir_display_chinese_data(display_mode_status);
+    // ir_display_chinese_data(display_mode_status);
 
-    display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
-    display.display();
+    // display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
+    // display.display();
 
-    display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
-    display.display();
+    // display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
+    // display.display();
 
-    ir_display_chinese_data(display_work_status);
+    // ir_display_chinese_data(display_work_status);
 
 
-    display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
-    display.setTextSize(3);
-    display.println("25");
-    display.display();
+    // display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
+    // display.setTextSize(3);
+    // display.println("25");
+    // display.display();
 
-    display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);
+    // display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);
 
-    display.display();
+    // display.display();
+    #endif
 }
 
 
@@ -230,23 +263,73 @@ void display_work_status_name_set(uint8_t *mode_name, uint8_t word_number = 2)
 }
 
 
+uint8_t *find_mode_name(outside_ac_mode_2_type_ac_mode_t mode_2_type[], uint8_t outside_ac_mode)
+{
+    uint8_t *mode_name = mode_auto_word;
+
+    for (uint8_t index = 0; mode_2_type[index].type_ac_mode != AC_NULL_MODE; index++)
+    {
+        if (outside_ac_mode == mode_2_type[index].type_ac_mode)
+        {
+            switch (mode_2_type[index].type_ac_mode)
+            {
+            case AC_AUTO_MODE:
+                mode_name = mode_auto_word;
+                break;
+
+            case AC_DRY_MODE:
+                mode_name = mode_dry_word;
+                break;
+
+            case AC_COOL_MODE:
+                mode_name = mode_cool_word;
+                break;
+
+            case AC_FAN_MODE:
+                mode_name = mode_fan_word;
+                break;
+
+            case AC_HEAT_MODE:
+                mode_name = mode_hot_word;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    return mode_name;
+}
+
+
 // todo:next
 void display_work_mode_switch(void)
 {
+    uint8_t *mode_name = NULL;
+
     // Serial.printf("ac_control_use->type = %d\r\n", ac_control_use->type);
     switch (ac_control_use->type)
     {
     case AC_GREE_TYPE:
 
         display_devices_name_set(device_gree_name);
-        display_mode_name_set(mode_cool_word);
+        // display_mode_name_set(mode_cool_word);
+        mode_name = find_mode_name(gree_2_type_ac, ac_control_mode_get(ac_control_use));
+        display_mode_name_set(mode_name);
         break;
 
     case AC_MIDEA_TYPE:
+        display_devices_name_set(device_midea_name);
+        mode_name = find_mode_name(midea_2_type_ac, ac_control_mode_get(ac_control_use));
+        display_mode_name_set(mode_name);
         /* code */
         break;
 
     case LEARN_IR_CONTROL_TYPE:
+        display_devices_name_set(device_learn_name);
+        display_mode_name_set(NULL, 0);
+
         /* code */
         break;
 
@@ -281,7 +364,7 @@ void display_task(void)
         display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
 
         display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
-        
+
         ir_display_chinese_data(display_devices);
 
         ir_display_chinese_data(display_mode_status);
@@ -290,7 +373,11 @@ void display_task(void)
 
         display.setCursor(IR_TEMP_BEGIN_POINT_X, IR_TEMP_BEGIN_POINT_Y);
 
+        display.setTextSize(3);
+
         display.printf("%d", ac_control_temp_get(ac_control_use));
+
+        display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);
 
         display.display();
     }
