@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:17:06
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-10 15:20:06
+* @LastEditTime : 2021-10-10 17:13:35
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.cpp
 * @Description  :
 *******************************************************************************/
@@ -23,7 +23,7 @@
 
 
 ir_code_record_t ir_button_code_record;
-
+ir_schedule_t    ir_schedule = IR_LEARN_WAIT_BUTTON;
 
 // An IR detector/demodulator is connected to GPIO pin 14(D5 on a NodeMCU
 // board).
@@ -119,6 +119,10 @@ void ir_learn_task(void)
     static uint8_t  pin_long_timer_button = 0;
     static uint16_t learn_button_pin      = 0;
 
+    static uint32_t learn_wait_enter    = 0;
+    static uint8_t  learn_wait_enter_ok = 0;
+
+
     // 检测按钮长按
     if (digitalRead(learn_pin) == learn_pin_valid)
     {
@@ -142,17 +146,43 @@ void ir_learn_task(void)
     {
         pin_long_timer_button = 0;
         ir_learn_status       = IR_LEARN;
+        ir_schedule           = IR_LEARN_WAIT_BUTTON;
+        learn_wait_enter      = millis();
+        learn_wait_enter_ok   = 0;
     }
 
-
-    // 检测那个学习按钮按下
-    for (uint8_t index = 0; index < sizeof(ir_learn_pin_list); ++index)
+    if ((ir_schedule == IR_LEARN_WAIT_BUTTON) && (digitalRead(learn_pin) == HIGH))
     {
-        if (digitalRead(ir_learn_pin_list[index]) == LOW)
+        if (millis() - learn_wait_enter < 1000)
         {
-            learn_button_pin = ir_learn_pin_list[index];
+            learn_wait_enter_ok = 0;
+            return;
+        }
+        else
+        {
+            learn_wait_enter_ok = 1;
         }
     }
+
+
+    if (learn_wait_enter_ok == 0)
+    {
+        return;
+    }
+
+    if (ir_schedule == IR_LEARN_WAIT_BUTTON)
+    {
+        // 检测那个学习按钮按下
+        for (uint8_t index = 0; index < sizeof(ir_learn_pin_list); ++index)
+        {
+            if (digitalRead(ir_learn_pin_list[index]) == LOW)
+            {
+                learn_button_pin = ir_learn_pin_list[index];
+                ir_schedule      = IR_LEARN_WAIT_IR_VALUE;
+            }
+        }
+    }
+
 
     // 接收红外数据
     if (irrecv.decode(&results))
@@ -163,6 +193,7 @@ void ir_learn_task(void)
         // Serial.println(results.value);
         Serial.printf("results.value = %llu\r\n", results.value);
         irrecv.resume(); // Receive the next value
+        ir_schedule = IR_LEARN_FINISH;
     }
 
     // 学习按钮信息
@@ -172,5 +203,6 @@ void ir_learn_task(void)
         ir_learn_status       = IR_LEARN_OK;
         // todo:学习
         ir_code_record_flash(learn_button_pin, results);
+        ir_schedule = IR_LEARN_WAIT_BUTTON;
     }
 }

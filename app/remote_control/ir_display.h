@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:19:31
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-08 15:56:57
+* @LastEditTime : 2021-10-10 16:51:31
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.h
 * @Description  :
 *******************************************************************************/
@@ -32,6 +32,10 @@
 
 #define IR_TEMP_CODE_BEGIN_POINT_X          100
 #define IR_TEMP_CODE_BEGIN_POINT_Y          43
+
+
+#define IR_LEARN_GUIDE_BEGIN_POINT_X        0
+#define IR_LEARN_GUIDE_BEGIN_POINT_Y        30
 
 // todo 温度图标跟随温度后续
 

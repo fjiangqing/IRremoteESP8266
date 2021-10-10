@@ -2,13 +2,15 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:57:44
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-06 11:47:12
+* @LastEditTime : 2021-10-10 17:02:31
 * @FilePath     : \IRremoteESP8266\app\remote_control\button.cpp
 * @Description  :
 *******************************************************************************/
 #include "button.h"
 
 #include "air_conditioner.h"
+
+#include "ir_learn.h"
 
 #include <Arduino.h>
 
@@ -106,7 +108,10 @@ void button_task(void)
     static uint8_t mode_pin_old      = 0;
 
     // static uint8_t fan_pin_old       = 0;
-
+    if(ir_learn_status == IR_LEARN)
+    {
+        return ;
+    }
     // 按钮按下检查
     if (button_fall_check(power_pin, power_delay, power_pin_old) == BUTTON_STATUS_FALL)
     {

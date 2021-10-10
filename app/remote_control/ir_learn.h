@@ -2,9 +2,9 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 00:58:04
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-10 15:11:28
+* @LastEditTime : 2021-10-10 16:39:41
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.h
-* @Description  : 
+* @Description  :
 *******************************************************************************/
 
 #ifndef IR_LEARN_H
@@ -20,6 +20,12 @@ typedef enum
 
 typedef decode_results ir_code_t;
 
+typedef enum
+{
+    IR_LEARN_WAIT_BUTTON = 0,
+    IR_LEARN_WAIT_IR_VALUE,
+    IR_LEARN_FINISH,
+} ir_schedule_t;
 
 typedef struct
 {
@@ -33,7 +39,8 @@ void ir_learn_init(void);
 
 void ir_learn_task(void);
 
-extern ir_code_record_t ir_button_code_record;
+extern ir_code_record_t  ir_button_code_record;
 extern ir_learn_status_t ir_learn_status;
+extern ir_schedule_t ir_schedule;
 
 #endif
