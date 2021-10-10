@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 00:58:04
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-06 15:14:18
+* @LastEditTime : 2021-10-10 15:11:28
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.h
 * @Description  : 
 *******************************************************************************/
@@ -34,5 +34,6 @@ void ir_learn_init(void);
 void ir_learn_task(void);
 
 extern ir_code_record_t ir_button_code_record;
+extern ir_learn_status_t ir_learn_status;
 
 #endif

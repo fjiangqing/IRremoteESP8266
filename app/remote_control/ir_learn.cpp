@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:17:06
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-06 18:13:12
+* @LastEditTime : 2021-10-10 15:20:06
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.cpp
 * @Description  :
 *******************************************************************************/
@@ -127,6 +127,7 @@ void ir_learn_task(void)
         {
             pin_long_timer_button = 1;
             pin_button_old        = 1;
+            Serial.println("learn long");
             // ir_learn_status = IR_LEARN;
         }
     }
