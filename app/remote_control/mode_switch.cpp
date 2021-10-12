@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 23:47:01
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-05 20:16:22
+* @LastEditTime : 2021-10-12 10:16:45
 * @FilePath     : \IRremoteESP8266\app\remote_control\mode_switch.cpp
 * @Description  :
 *******************************************************************************/
@@ -19,6 +19,7 @@ const uint16_t button_delay      = 1000;
 
 void sys_ac_device_switch_init(void)
 {
+    // 控制按钮初始化
     pinMode(mode_switch_pin, INPUT_PULLUP);
 }
 
@@ -35,6 +36,7 @@ work_mode_t sys_ac_device_switch(void)
 {
     static uint32_t timer_old = 0;
 
+    // 按钮滤波
     if ((digitalRead(mode_switch_pin) == mode_switch_valid))
     {
         // Serial.printf("__LINE__ = %d\r\n", __LINE__);
@@ -43,7 +45,7 @@ work_mode_t sys_ac_device_switch(void)
         {
             timer_old = millis();
             Serial.printf("__LINE__ = %d\r\n", __LINE__);
-
+            // 按钮按下后从模式0~2进行循环切换
             if (sys_work_mode < AC_LEARN_MODE)
             {
                 Serial.printf("__LINE__ = %d\r\n", __LINE__);

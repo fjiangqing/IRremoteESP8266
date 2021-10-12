@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-02 18:40:30
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-09 15:27:34
+* @LastEditTime : 2021-10-12 10:34:02
 * @FilePath     : \IRremoteESP8266\app\remote_control\air_conditioner.cpp
 * @Description  :
 *******************************************************************************/
@@ -43,21 +43,22 @@ ac_remote_control_t *ac_control_use = NULL;
 //     .ac_temp_down = NULL,
 // };
 
-
+// 空调设备初始化
 void ac_control_init(ac_remote_control_t *ac)
 {
     ac->control->ac_init();
 }
 
-
+// 空调设备开机
 void ac_control_on(ac_remote_control_t *ac)
 {
+    // 使用函数指针调用
     ac->control->ac_on();
     ac->ac_ir_work_status = AC_IR_WORK_RUN;
     RUNNING_LOG(ac->ac_ir_work_status);
 }
 
-
+// 空调设备关机
 void ac_control_off(ac_remote_control_t *ac)
 {
     ac->control->ac_off();
@@ -65,19 +66,19 @@ void ac_control_off(ac_remote_control_t *ac)
     RUNNING_LOG(ac->ac_ir_work_status);
 }
 
-
+// 空调设备温度加
 void ac_control_temp_up(ac_remote_control_t *ac)
 {
     ac->control->ac_temp_up();
 }
 
-
+// 空调设备温度减
 void ac_control_temp_down(ac_remote_control_t *ac)
 {
     ac->control->ac_temp_down();
 }
 
-
+// 空调设备温度获取
 int ac_control_temp_get(ac_remote_control_t *ac)
 {
     if (ac->control->ac_temp_get != NULL)
@@ -90,7 +91,7 @@ int ac_control_temp_get(ac_remote_control_t *ac)
     }
 }
 
-
+// 空调设备模式获取
 int ac_control_mode_get(ac_remote_control_t *ac)
 {
     if (ac->control->ac_mode_get != NULL)
@@ -103,7 +104,7 @@ int ac_control_mode_get(ac_remote_control_t *ac)
     }
 }
 
-
+// 空调设备模式切换
 void ac_control_mode_switch(ac_remote_control_t *ac)
 {
     ac->control->ac_mode_switch();
@@ -403,7 +404,7 @@ void universal_ir_mode_switch(void)
 }
 
 
-// todo: 添加构造函数初始化
+// 具体实现功能函数指针初始化
 ac_control_t gree_ac_control =
 {
     .ac_init        = gree_ac_init,
@@ -438,7 +439,7 @@ ac_control_t universal_ir_control =
     .ac_mode_switch = universal_ir_mode_switch,
 };
 
-// todo:列表切换空调遥控器
+// 列表切换空调遥控器
 ac_remote_control_t ac_control_arr[] =
 {
     { AC_GREE_TYPE,          &gree_ac_control,      AC_IR_WORK_CLOSE },

@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-07 18:20:20
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-10 16:50:20
+* @LastEditTime : 2021-10-12 10:29:32
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_display.cpp
 * @Description  :
 *******************************************************************************/
@@ -192,10 +192,10 @@ void ir_display_chinese_data(ir_display_data_t& display_data);
 void display_init(void)
 {
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    // 初始化OLED驱动IC为SSD1306_SWITCHCAPVCC， I2C地址：0x3C。
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-    // Show image buffer on the display hardware.
-    // Since the buffer is intialized with an Adafruit splashscreen
-    // internally, this will display the splashscreen.
+
+    // 显示开机画面
     display.display();
     delay(1000);
 
@@ -203,10 +203,11 @@ void display_init(void)
     display.clearDisplay();
     display.display();
 
-    // text display tests
+    // 设定字体大小为1，颜色白色
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
 
+    // 设定显示初始位置为0,0。屏幕左上角为0，0。横轴X,纵轴Y
     display.setCursor(0, 0);
 
     display.display(); // actually display all of the above
@@ -267,9 +268,11 @@ void ir_display_chinese_data(ir_display_data_t& display_data)
 
 void display_devices_name_set(uint8_t *device_name, uint8_t word_number = 2)
 {
+    // 显示内容存储，与多少各文字
     display_devices.data        = device_name;
     display_devices.word_number = word_number;
 
+    // 显示坐标
     display_devices.begin_x = IR_DEVICE_BEGIN_POINT_X;
     display_devices.begin_y = IR_DEVICE_BEGIN_POINT_Y;
 
@@ -308,6 +311,7 @@ uint8_t *find_mode_name(outside_ac_mode_2_type_ac_mode_t mode_2_type[], uint8_t 
 {
     uint8_t *mode_name = mode_auto_word;
 
+    // 查找模式对应的文字字模
     for (uint8_t index = 0; mode_2_type[index].type_ac_mode != AC_NULL_MODE; index++)
     {
         if (outside_ac_mode == mode_2_type[index].outside_ac_mode)
@@ -350,12 +354,14 @@ void display_work_mode_switch(void)
     uint8_t *mode_name = NULL;
 
     // Serial.printf("ac_control_use->type = %d\r\n", ac_control_use->type);
+    // 更具当前工作设备设点显示内容
     switch (ac_control_use->type)
     {
     case AC_GREE_TYPE:
-
+        // 设定设备名称
         display_devices_name_set(device_gree_name);
         // display_mode_name_set(mode_cool_word);
+        // 设定模式名称
         mode_name = find_mode_name(gree_2_type_ac, ac_control_mode_get(ac_control_use));
         display_mode_name_set(mode_name);
         break;
@@ -378,6 +384,7 @@ void display_work_mode_switch(void)
         break;
     }
 
+    // 设定设定处于运行关闭
     if (ac_control_use->ac_ir_work_status == AC_IR_WORK_RUN)
     {
         display_work_status_name_set(ir_run_word);
@@ -394,12 +401,16 @@ void display_task(void)
     #if 1
     static uint32_t timer_old = 0;
 
+    // 红外学习引导提示，每500ms更新一次
     if ((millis() - timer_old > 500) &&
         (ir_learn_status == IR_LEARN))
     {
+        // 清楚屏幕旧内容
         display.clearDisplay();
-        display_chinese_16bit(device_in_learn_name, 3, 0, 0);
 
+        // 显示学习中提示处于学习模式
+        display_chinese_16bit(device_in_learn_name, 3, 0, 0);
+        // 判断当前学习进度，根据进度提示不同的内容
         switch (ir_schedule)
         {
         case IR_LEARN_WAIT_BUTTON:
@@ -422,21 +433,26 @@ void display_task(void)
         default:
             break;
         }
+        // 刷新屏幕内容
         display.display();
         timer_old = millis();
     }
 
+    // 空调控制
     if ((millis() - timer_old > 500) &&
         (ir_learn_status == IR_LEARN_OK))
     {
         timer_old = millis();
-
+        
+        //切换不同设备对应的文字提示
         display_work_mode_switch();
 
         display.clearDisplay();
 
+        // 画竖线
         display.drawFastVLine(IR_VERTICAL_BEGIN_LINE_POINT_X, IR_VERTICAL_BEGIN_LINE_POINT_Y, IR_VERTICAL_BEGIN_LINE_POINT_LEN, SSD1306_WHITE);
 
+        // 画横线
         display.drawFastHLine(IR_HORIZONTAL_LINE_BEGIN_POINT_X, IR_HORIZONTAL_LINE_BEGIN_POINT_Y, 128 - IR_HORIZONTAL_LINE_BEGIN_POINT_X, SSD1306_WHITE);
 
         ir_display_chinese_data(display_devices);
@@ -449,6 +465,7 @@ void display_task(void)
 
         display.setTextSize(3);
 
+        // 显示温度数据
         display.printf("%d", ac_control_temp_get(ac_control_use));
 
         display_chinese_16bit(temp_code_word, 1, IR_TEMP_CODE_BEGIN_POINT_X, IR_TEMP_CODE_BEGIN_POINT_Y);

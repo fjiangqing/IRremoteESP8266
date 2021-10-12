@@ -36,12 +36,15 @@
 
 void setup()
 {
+    // 串口初始化，波特率：115200,无校验，一位停止位。
     Serial.begin(115200);
     delay(200);
 
+    // 打印一条日志提示系统运行
     Serial.println("");
     Serial.println("jon remote control ...");
 
+    // 调用红外学习，按钮，模式切换初始化
     ir_learn_init();
 
     button_init();
@@ -56,7 +59,7 @@ void setup()
             ac_control_use = index;
         }
     }
-
+    // 显示功能初始化
     display_init();
 }
 
@@ -65,13 +68,16 @@ void loop()
 {
     // Now send the IR signal.
     // ac_control_on(ac_control_use);
-
+    // 模式切换
     sys_ac_device_switch();
-
+    
+    // 按钮控制响应
     button_task();
-
+    
+    //学习红外处理 
     ir_learn_task();
 
+    // 模式切换后更换红外发射控制
     for (ac_remote_control_t *index = ac_control_arr; index->type != AC_NULL_TYPE; ++index)
     {
         if (index->type == sys_ac_device_get())
@@ -80,6 +86,7 @@ void loop()
         }
     }
 
+    // 显示函数
     display_task();
     // gree_ac.send();
 

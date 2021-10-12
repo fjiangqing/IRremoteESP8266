@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:57:44
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-10 17:02:31
+* @LastEditTime : 2021-10-12 10:30:57
 * @FilePath     : \IRremoteESP8266\app\remote_control\button.cpp
 * @Description  :
 *******************************************************************************/
@@ -51,6 +51,7 @@ const uint8_t  button_valid = LOW;
 
 void button_init(void)
 {
+    // 控制按钮初始化
     pinMode(power_pin, INPUT_PULLUP);
     pinMode(temp_up_pin, INPUT_PULLUP);
     pinMode(temp_down_pin, INPUT_PULLUP);
@@ -70,7 +71,7 @@ typedef  enum
 
 int button_fall_check(uint16_t pin, uint32_t& delay_old, uint8_t& pin_status_old)
 {
-    // 按钮按下检查
+    // 按钮按下检查,只在按下时候有效。下降沿检测
     if (digitalRead(pin) == LOW)
     {
         if ((millis() - delay_old > button_delay) &&
@@ -107,7 +108,7 @@ void button_task(void)
     static uint8_t temp_down_pin_old = 0;
     static uint8_t mode_pin_old      = 0;
 
-    // static uint8_t fan_pin_old       = 0;
+    // 学习中模式下不进行发射红外
     if(ir_learn_status == IR_LEARN)
     {
         return ;
@@ -117,8 +118,10 @@ void button_task(void)
     {
         // todo:
         Serial.printf("power_pin down = %d\r\n", __LINE__);
+        // 更具控制电源按钮,开机按下按钮关机，关机按下按钮开机。
         if (ac_control_use->ac_ir_work_status == AC_IR_WORK_CLOSE)
         {
+            // 调用具体控制空调红外代码
             ac_control_on(ac_control_use);
         }
         else
@@ -129,6 +132,7 @@ void button_task(void)
         Serial.printf("power_pin down = %d\r\n", __LINE__);
     }
 
+    // 温度增加控制
     if (button_fall_check(temp_up_pin, temp_up_delay, temp_up_pin_old) == BUTTON_STATUS_FALL)
     {
         // todo:
@@ -137,6 +141,7 @@ void button_task(void)
         ac_control_temp_up(ac_control_use);
     }
 
+    // 温度减少控制
     if (button_fall_check(temp_down_pin, temp_down_delay, temp_down_pin_old) == BUTTON_STATUS_FALL)
     {
         // todo:
@@ -145,6 +150,7 @@ void button_task(void)
         ac_control_temp_down(ac_control_use);
     }
 
+    // 模式切换控制
     if (button_fall_check(mode_switch_pin, mode_delay, mode_pin_old) == BUTTON_STATUS_FALL)
     {
         // todo:

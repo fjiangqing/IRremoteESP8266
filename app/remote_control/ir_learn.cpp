@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:17:06
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-12 10:08:24
+* @LastEditTime : 2021-10-12 10:24:05
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.cpp
 * @Description  :
 *******************************************************************************/
@@ -72,13 +72,16 @@ void eeprom_write_data(uint32_t address, uint8_t *data, uint16_t lenght)
 
 void ir_learn_init(void)
 {
+    // 红外接收对线初始化，负责红外接收功能
     irrecv.enableIRIn(); // Start the receiver
 
+    // GPIO 学习按钮初始化上拉输入
     pinMode(learn_pin, INPUT_PULLUP);
 
+    // EEPROM初始化，存储大小为512byte
     EEPROM.begin(512);
 
-    // todo:flash读取记录数据
+    // 读取flash记录数据,学习按钮掉电存储位置
     eeprom_read_data(EEPROM_SAVA_BEGIN_ADDRESS, (uint8_t *)&ir_button_code_record, sizeof(ir_button_code_record));
 }
 
@@ -96,6 +99,7 @@ uint16_t ir_learn_pin_list[] = { power_pin, temp_up_pin, temp_down_pin, mode_swi
 
 void ir_code_record_flash(uint16_t& learn_button_pin, decode_results& decode)
 {
+    // 判断要存储在那个按钮下
     switch (learn_button_pin)
     {
     case temp_down_pin:
@@ -119,7 +123,7 @@ void ir_code_record_flash(uint16_t& learn_button_pin, decode_results& decode)
         break;
     }
 
-    // todo:写入flash
+    // 学习数据写入flash
     eeprom_write_data(EEPROM_SAVA_BEGIN_ADDRESS, (uint8_t *)&ir_button_code_record, sizeof(ir_button_code_record));
 }
 
@@ -163,6 +167,7 @@ void ir_learn_task(void)
         learn_wait_enter_ok   = 0;
     }
 
+    // 等待学习按钮松开
     if ((ir_schedule == IR_LEARN_WAIT_BUTTON) && (digitalRead(learn_pin) == HIGH))
     {
         if (millis() - learn_wait_enter < 1000)
@@ -182,6 +187,7 @@ void ir_learn_task(void)
         return;
     }
 
+    // 检测那个按钮按下，学习到的信息存储与这个按钮下
     if (ir_schedule == IR_LEARN_WAIT_BUTTON)
     {
         // 检测那个学习按钮按下
@@ -196,24 +202,21 @@ void ir_learn_task(void)
     }
 
 
-    // 接收红外数据
+    // 接收红外数据,results,存储解码后的数据。
     if (irrecv.decode(&results))
     {
-        // irrecv.re
-        // print() & println() can't handle printing long longs. (uint64_t)
-        // serialPrintUint64(results.value, HEX);
-        // Serial.println(results.value);
+        // results.value：接收红外数据值
         Serial.printf("results.value = %llu\r\n", results.value);
         irrecv.resume(); // Receive the next value
         ir_schedule = IR_LEARN_FINISH;
     }
 
-    // 学习按钮信息
+    // 学习完成检测
     if ((ir_learn_status == IR_LEARN) && (pin_long_timer_button == 1))
     {
         pin_long_timer_button = 0;
         ir_learn_status       = IR_LEARN_OK;
-        // todo:学习
+        // 学习完成存储信息
         ir_code_record_flash(learn_button_pin, results);
         ir_schedule = IR_LEARN_WAIT_BUTTON;
     }
