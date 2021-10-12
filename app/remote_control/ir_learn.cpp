@@ -2,7 +2,7 @@
 * @Author       : Jon.Fang
 * @Date         : 2021-10-03 01:17:06
 * @LastEditors  : Jon.Fang
-* @LastEditTime : 2021-10-10 17:13:35
+* @LastEditTime : 2021-10-12 10:08:24
 * @FilePath     : \IRremoteESP8266\app\remote_control\ir_learn.cpp
 * @Description  :
 *******************************************************************************/
@@ -101,6 +101,18 @@ void ir_code_record_flash(uint16_t& learn_button_pin, decode_results& decode)
     case temp_down_pin:
         // ir_button_code_record.temp_down_button_code = results.value;
         ir_button_code_record.temp_down_button_code = decode;
+        break;
+
+    case temp_up_pin:
+        ir_button_code_record.temp_up_button_code = decode;
+        break;
+
+    case power_pin:
+        ir_button_code_record.power_button_code = decode;
+        break;
+
+    case mode_switch_pin:
+        ir_button_code_record.mode_switch_button_code = decode;
         break;
 
     default:
